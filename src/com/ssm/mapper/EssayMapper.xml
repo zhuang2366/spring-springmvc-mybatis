@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ssm.mapper.EssayMapper">
+    <!--配置二级缓存-->
+    <cache></cache>
+
+    <!--映射关系-->
+    <resultMap id="EssayResultMap" type="Essay">
+        <id column="id" property="id"/>
+        <result column="preview_img" property="previewImg"/>
+        <result column="title" property="title"/>
+        <result column="time" property="time"/>
+        <result column="preview_num" property="previewNum"/>
+        <result column="status" property="status"/>
+        <result column="tag_id" property="tagId"/>
+        <result column="tag_name" property="tagName"/>
+    </resultMap>
+
+    <!--公共代码-->
+    <sql id="Essay_SQL">
+      select e.id,
+             e.preview_img,
+             e.title,
+             e.content,
+             e.time,
+             e.preview_num,
+             e.status,
+             e.tag_id,
+             t.name as tag_name
+      from essay e join tag t on(e.tag_id=t.id)
+    </sql>
+
+    <!--新增-->
+    <insert id="saveEssay" parameterType="Essay">
+        insert into essay
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="previewImg != null and previewImg !='' ">preview_img,</if>
+            <if test="title != null and title !='' ">title,</if>
+            <if test="content != null and content !='' ">content,</if>
+            <if test="time != null ">time,</if>
+            <if test="previewNum != null and previewNum !=0 ">preview_num,</if>
+            <if test="status != null and status !=0 ">status,</if>
+            <if test="tagId != null and tagId !=0 ">tag_id,</if>
+        </trim>
+        <trim prefix=" values(" suffix=")" suffixOverrides="," >
+            <if test="previewImg != null and previewImg !='' ">#{previewImg},</if>
+            <if test="title != null and title !='' ">#{title},</if>
+            <if test="content != null and content !='' ">#{content},</if>
+            <if test="time != null">#{time},</if>
+            <if test="previewNum != null and previewNum !=0 ">#{previewNum},</if>
+            <if test="status != null and status !=0 ">#{status},</if>
+            <if test="tagId != null and tagId !=0 ">#{tagId},</if>
+        </trim>
+    </insert>
+
+    <!--删除-->
+    <delete id="deleteEssay" parameterType="list">
+        <if test="list.size != 0 ">
+            delete from essay
+            <where>
+                <foreach collection="list" item="id" open="id in (" close=")" separator=",">
+                    #{id}
+                </foreach>
+            </where>
+        </if>
+    </delete>
+
+    <!--修改-->
+    <update id="updateEssay" parameterType="Essay">
+        update essay
+        <set>
+            <if test="previewImg != null and previewImg !='' ">preview_img = #{previewImg},</if>
+            <if test="title != null and title !='' ">title = #{title},</if>
+            <if test="content != null and content !='' ">content = #{content},</if>
+            <if test="time != null">time = #{time},</if>
+            <if test="previewNum != null and previewNum !=0 ">preview_num = #{previewNum},</if>
+            <if test="status != null and status !=0 ">status = #{status},</if>
+            <if test="tagId != null and tagId !=0 ">tag_id = #{tagId},</if>
+        </set>
+        <where>
+            <if test="id != null and id !=0 ">id = #{id}</if>
+        </where>
+    </update>
+
+    <!--查询列表-->
+    <select id="listEssay" parameterType="Essay" resultMap="EssayResultMap">
+        <include refid="Essay_SQL"></include>
+        <where>
+            <if test="previewImg != null and previewImg !='' ">and e.preview_img = #{previewImg}</if>
+            <if test="title != null and title !='' ">and e.title like concat('%',#{title},'%')</if>
+            <if test="content != null and content !='' ">and e.content = #{content}</if>
+            <if test="time != null">and e.time = #{time}</if>
+            <if test="previewNum != null and previewNum !=0 ">and e.preview_num = #{previewNum}</if>
+            <if test="status != null and status !=0 ">and e.status = #{status}</if>
+            <if test="tagId != null and tagId !=0 ">and e.tag_id = #{tagId}</if>
+        </where>
+        order by e.id desc
+    </select>
+
+    <!--查询对象-->
+    <select id="getEssay" parameterType="Essay" resultMap="EssayResultMap">
+        <include refid="Essay_SQL"></include>
+        <where>
+            <if test="id != null and id !=0 ">and e.id = #{id}</if>
+        </where>
+    </select>
+
+    <!--新增预览-->
+    <update id="addPreviewNum" parameterType="int">
+        update essay set preview_num = preview_num + 1 where id = #{id}
+    </update>
+
+    <!--上一篇-->
+    <select id="up" resultMap="EssayResultMap" parameterType="int">
+        <include refid="Essay_SQL"></include>
+        <where>
+            e.id <![CDATA[ > ]]> #{id} order by e.id asc limit 1
+        </where>
+    </select>
+
+    <!--下一篇-->
+    <select id="next" resultMap="EssayResultMap" parameterType="int">
+        <include refid="Essay_SQL"></include>
+        <where>
+            e.id <![CDATA[ < ]]> #{id} order by e.id desc limit 1
+        </where>
+    </select>
+
+    <!--随机获取-->
+    <select id="randEssay" resultMap="EssayResultMap" parameterType="int">
+        <include refid="Essay_SQL"></include>
+        order by rand() limit #{pageSize}
+    </select>
+
+</mapper>

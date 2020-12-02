@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+    <!-- 全局设置-->
+    <settings>
+        <setting name="logImpl" value="STDOUT_LOGGING"/>
+        <setting name="cacheEnabled" value="true"/>
+    </settings>
+
+    <!-- 设置别名 -->
+    <typeAliases>
+        <package name="com.ssm.entity"/>
+    </typeAliases>
+
+    <!-- 分页插件，设置数据库类型-->
+    <plugins>
+        <plugin interceptor="com.github.pagehelper.PageHelper">
+            <property name="dialect" value="mysql"/>
+        </plugin>
+    </plugins>
+
+
+    <!-- SQL映射文件 -->
+    <mappers>
+        <package name="com.ssm.mapper"/>
+    </mappers>
+
+</configuration>
